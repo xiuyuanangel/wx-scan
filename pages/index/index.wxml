@@ -1,0 +1,12 @@
+<view class="container">
+  <button class="btn" bindtap="scanCode">点击扫描二维码</button>
+  
+  <view class="result-container" wx:if="{{scanResult}}">
+    <view class="result-title">扫描结果：</view>
+    <view class="result-text">{{scanResult}}</view>
+  </view>
+
+  <view class="tip-text" wx:if="{{!scanResult}}">
+    点击上方按钮开始扫描二维码
+  </view>
+</view>

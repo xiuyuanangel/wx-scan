@@ -1,0 +1,37 @@
+/**app.wxss**/
+page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 20rpx;
+}
+
+.btn {
+  width: 80%;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  border-radius: 44rpx;
+  background-color: #07c160;
+  color: #fff;
+  font-size: 32rpx;
+  margin: 20rpx 0;
+}
+
+.result-text {
+  margin-top: 30rpx;
+  font-size: 28rpx;
+  color: #333;
+  text-align: center;
+  word-break: break-all;
+  padding: 0 30rpx;
+}
