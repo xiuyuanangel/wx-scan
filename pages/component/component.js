@@ -1,4 +1,3 @@
-
 // 引入二维码生成工具
 const { drawQrcode, QRErrorCorrectLevel } = require('../../utils/weapp-qrcode.js')
 
@@ -27,10 +26,17 @@ Page({
   },
 
   onShow() {
+    // 每次显示页面时刷新数据
+    this.loadGroupList();
     // 如果有搜索关键词，重新执行搜索
     if (this.data.searchKeyword) {
       this.filterGroups();
     }
+  },
+
+  // 供其他页面调用的刷新方法
+  refreshData() {
+    this.loadGroupList();
   },
 
   // 加载分组列表
@@ -152,7 +158,7 @@ Page({
   // 过滤分组列表
   filterGroups() {
     const { groupList, searchKeyword } = this.data;
-    
+
     if (!searchKeyword) {
       // 如果没有搜索关键词，显示全部
       this.setData({
@@ -164,14 +170,83 @@ Page({
     // 执行搜索过滤
     const keyword = searchKeyword.toLowerCase();
     const filtered = groupList.filter(group => {
+      // 检查分组名称和描述
       const name = (group.name || '').toLowerCase();
       const desc = (group.description || '').toLowerCase();
-      return name.includes(keyword) || desc.includes(keyword);
+      if (name.includes(keyword) || desc.includes(keyword)) {
+        return true;
+      }
+
+      // 检查分组下的元件信息
+      let components = [];
+      try {
+        const componentsKey = `components_${group.id}`;
+        components = wx.getStorageSync(componentsKey) || [];
+      } catch (error) {
+        console.error(`获取分组 ${group.id} 的元件信息失败：`, error);
+        return false;
+      }
+
+      // 使用提取的方法检查元件是否匹配
+      return components.some(component => this.isComponentMatch(component, keyword));
     });
 
+    // 更新过滤后的列表
     this.setData({
       filteredGroupList: filtered
     });
+
+    // 统计匹配信息
+    if (filtered.length > 0) {
+      let totalMatchedComponents = 0;
+      let matchedTypes = new Set();
+
+      filtered.forEach(group => {
+        try {
+          const componentsKey = `group_components_${group.id}`;
+          const components = wx.getStorageSync(componentsKey) || [];
+          const matchedComponents = components.filter(component => {
+            const isMatch = this.isComponentMatch(component, keyword);
+            if (isMatch && component.type) {
+              matchedTypes.add(component.type);
+            }
+            return isMatch;
+          });
+
+          totalMatchedComponents += matchedComponents.length;
+        } catch (error) {
+          console.error('计算匹配元件数量失败：', error);
+        }
+      });
+    }
+  },
+
+  // 新增的公共搜索方法
+  isComponentMatch(component, keyword) {
+    const componentName = (component.name || '').toLowerCase();
+    const componentType = (component.type || '').toLowerCase();
+    const componentModel = (component.model || '').toLowerCase();
+    const componentDesc = (component.description || '').toLowerCase();
+    const componentSpecs = (component.specifications || '').toLowerCase();
+    const componentParams = (component.parameters || '').toLowerCase();
+
+    let paramsSearchText = '';
+    try {
+      const params = JSON.parse(component.parameters);
+      paramsSearchText = Object.entries(params)
+        .map(([key, value]) => `${key}${value}`)
+        .join(' ')
+        .toLowerCase();
+    } catch (e) {
+      paramsSearchText = componentParams;
+    }
+
+    return componentName.includes(keyword) ||
+      componentType.includes(keyword) ||
+      componentModel.includes(keyword) ||
+      componentDesc.includes(keyword) ||
+      componentSpecs.includes(keyword) ||
+      paramsSearchText.includes(keyword);
   },
 
   // 显示添加分组表单
@@ -184,7 +259,7 @@ Page({
         name: '',
         description: ''
       }
-    })
+    });
   },
 
   // 隐藏分组表单
@@ -197,18 +272,18 @@ Page({
         name: '',
         description: ''
       }
-    })
+    });
   },
 
   // 显示二维码
   showQrCode(e) {
-    const { id } = e.currentTarget.dataset
+    const { id } = e.currentTarget.dataset;
     this.setData({
       showQrCodePopup: true,
       currentQrCodeId: id
     }, () => {
-      this.generateQrCode(id)
-    })
+      this.generateQrCode(id);
+    });
   },
 
   // 隐藏二维码
@@ -241,30 +316,59 @@ Page({
 
     wx.showModal({
       title: '确认删除',
-      content: `确定要删除分组"${group.name}"吗？删除后无法恢复。`,
+      content: `确定要删除分组"${group.name}"吗？删除后该分组下的所有元件数据也将被删除，且无法恢复。`,
       success: (res) => {
         if (res.confirm) {
-          // 获取现有分组
-          const groups = wx.getStorageSync('component_groups') || [];
-          // 过滤掉要删除的分组
-          const newGroups = groups.filter(group => group.id !== id);
-          // 保存更新后的分组列表
-          wx.setStorageSync('component_groups', newGroups);
+          try {
+            // 开始删除操作
+            wx.showLoading({
+              title: '正在删除...',
+              mask: true
+            });
 
-          // 如果当前有搜索关键词，且删除后搜索结果为空，则清空搜索
-          if (this.data.searchKeyword && 
-              this.data.filteredGroupList.length === 1 && 
-              this.data.filteredGroupList[0].id === id) {
-            this.clearSearch();
-          } else {
-            // 否则仅刷新列表
-            this.loadGroupList();
+            // 1. 删除分组数据
+            const groups = wx.getStorageSync('component_groups') || [];
+            const newGroups = groups.filter(group => group.id !== id);
+            wx.setStorageSync('component_groups', newGroups);
+
+            // 2. 删除分组下的元件数据
+            const componentsKey = `components_${id}`;
+            wx.removeStorageSync(componentsKey);
+
+            // 3. 删除分组统计数据
+            const statsKey = `group_stats_${id}`;
+            wx.removeStorageSync(statsKey);
+
+            // 4. 通知其他页面分组已删除
+            const pages = getCurrentPages();
+            pages.forEach(page => {
+              // 如果是详情页且显示的是被删除的分组，则返回上一页
+              if (page.route === 'pages/component-detail/component-detail' && 
+                  page.options.id === id) {
+                wx.navigateBack({
+                  delta: 1
+                });
+              }
+              // 如果页面有refreshData方法，调用它刷新数据
+              if (typeof page.refreshData === 'function') {
+                page.refreshData();
+              }
+            });
+
+            // 5. 更新当前页面显示
+            if (this.data.searchKeyword && 
+                this.data.filteredGroupList.length === 1 && 
+                this.data.filteredGroupList[0].id === id) {
+              this.clearSearch();
+            } else {
+              this.loadGroupList();
+            }
+
+            wx.hideLoading();
+          } catch (error) {
+            console.error('删除分组失败：', error);
+            wx.hideLoading();
           }
-          
-          wx.showToast({
-            title: '删除成功',
-            icon: 'success'
-          });
         }
       }
     });
@@ -294,10 +398,6 @@ Page({
     
     // 验证输入
     if (!formData.name) {
-      wx.showToast({
-        title: '请输入分组名称',
-        icon: 'none'
-      })
       return
     }
 
@@ -318,7 +418,8 @@ Page({
       // 添加模式
       groups.push({
         ...formData,
-        count: 0,
+        typeCount: 0,
+        totalCount: 0,
         createTime: new Date().getTime(),
         updateTime: new Date().getTime()
       })
@@ -342,22 +443,16 @@ Page({
         currentQrCodeId: groupId
       }, () => {
         this.generateQrCode(groupId)
-        wx.showToast({
-          title: '保存成功',
-          icon: 'success'
-        })
       })
     })
   },
 
   // 显示分组详情
   showGroupDetail(e) {
-    const { id } = e.currentTarget.dataset
-    // TODO: 跳转到分组详情页面
-    wx.showToast({
-      title: '分组详情开发中',
-      icon: 'none'
-    })
+    const { id } = e.currentTarget.dataset;
+    wx.navigateTo({
+      url: `/pages/component-detail/component-detail?id=${id}`
+    });
   },
 
   // 生成分组ID
@@ -367,42 +462,351 @@ Page({
     return `G${timestamp}${random}`
   },
 
-  // 生成二维码
+  // 生成组合图片（二维码+分组信息）
+  async generateCombinedImage(groupId) {
+    const query = wx.createSelectorQuery();
+    const group = this.data.groupList.find(g => g.id === groupId);
+    
+    return new Promise((resolve, reject) => {
+      query.select('#qrcode')
+        .fields({ node: true, size: true })
+        .exec((res) => {
+          if (res[0] && res[0].node) {
+            const canvas = res[0].node;
+            canvas.width = 800;  // 设置为二维码宽度的2倍，为右侧文本留出空间
+            canvas.height = 400; // 保持二维码为正方形
+
+            const ctx = canvas.getContext('2d');
+
+            // 清空画布
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 先生成二维码
+            const qrContent = JSON.stringify({
+              type: 'component_group',
+              id: groupId,
+              time: new Date().getTime()
+            });
+
+            // 使用 Promise 包装二维码生成
+            new Promise((resolveQr) => {
+              drawQrcode({
+                width: 400,
+                height: 400,
+                canvasId: 'qrcode',
+                typeNumber: -1,
+                correctLevel: QRErrorCorrectLevel.M,
+                background: '#ffffff',
+                foreground: '#000000',
+                text: qrContent,
+                callback: (res) => {
+                  resolveQr(res);
+                }
+              });
+            }).then(() => {
+              // 绘制分割线
+              ctx.beginPath();
+              ctx.moveTo(420, 40);  // 留出一些边距
+              ctx.lineTo(420, 360); // 不要占满整个高度
+              ctx.strokeStyle = '#eee';
+              ctx.stroke();
+
+              // 绘制分组信息
+              // 标题样式
+              ctx.fillStyle = '#333333';
+              ctx.font = 'bold 24px sans-serif';  // 增大字号
+              ctx.fillText('分组信息', 460, 80);
+
+              // 分组名称
+              ctx.fillStyle = '#333333';
+              ctx.font = 'bold 20px sans-serif';
+              ctx.fillText('名称：', 460, 160);
+              
+              ctx.fillStyle = '#666666';
+              ctx.font = '20px sans-serif';
+              const groupName = group ? group.name : '';
+              // 如果文本过长，进行截断
+              const maxWidth = 280; // 最大宽度
+              let displayName = groupName;
+              if (ctx.measureText(groupName).width > maxWidth) {
+                let ellipsis = '...';
+                let textWidth = ctx.measureText(ellipsis).width;
+                let i = groupName.length - 1;
+                while (i > 0) {
+                  textWidth += ctx.measureText(groupName[i]).width;
+                  if (textWidth > maxWidth) {
+                    displayName = groupName.slice(0, i) + ellipsis;
+                    break;
+                  }
+                  i--;
+                }
+              }
+              ctx.fillText(displayName, 460, 200);
+              
+              // 分组ID
+              ctx.fillStyle = '#333333';
+              ctx.font = 'bold 20px sans-serif';
+              ctx.fillText('ID：', 460, 260);
+              
+              ctx.fillStyle = '#666666';
+              ctx.font = '20px sans-serif';
+              ctx.fillText(groupId, 460, 300);
+
+              resolve(canvas);
+            });
+          } else {
+            reject(new Error('Canvas not found'));
+          }
+        });
+    });
+  },
+
+  // 分享功能
+  onShareAppMessage(res) {
+    if (res.from === 'button' && res.target.dataset.type === 'qrcode') {
+      const group = this.data.groupList.find(g => g.id === this.data.currentQrCodeId);
+      return {
+        title: `${group ? group.name : '分组'}的元件管理二维码`,
+        path: `/pages/component/component?scan=true&groupId=${this.data.currentQrCodeId}`,
+        imageUrl: '', // 这里可以设置自定义分享图片
+      };
+    }
+    return {
+      title: '元件管理',
+      path: '/pages/component/component'
+    };
+  },
+
+  // 生成组合图片（二维码+分组信息）
+  async generateCombinedImage(groupId) {
+    const query = wx.createSelectorQuery();
+    const group = this.data.groupList.find(g => g.id === groupId);
+    
+    return new Promise((resolve, reject) => {
+      query.select('#qrcode')
+        .fields({ node: true, size: true })
+        .exec((res) => {
+          if (res[0] && res[0].node) {
+            const canvas = res[0].node;
+            canvas.width = 800;  // 设置为二维码宽度的2倍，为右侧文本留出空间
+            canvas.height = 400; // 保持二维码为正方形
+
+            const ctx = canvas.getContext('2d');
+
+            // 清空画布
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 先生成二维码
+            const qrContent = JSON.stringify({
+              type: 'component_group',
+              id: groupId,
+              time: new Date().getTime()
+            });
+
+            // 使用 Promise 包装二维码生成
+            new Promise((resolveQr) => {
+              drawQrcode({
+                width: 400,
+                height: 400,
+                canvasId: 'qrcode',
+                typeNumber: -1,
+                correctLevel: QRErrorCorrectLevel.M,
+                background: '#ffffff',
+                foreground: '#000000',
+                text: qrContent,
+                callback: (res) => {
+                  resolveQr(res);
+                }
+              });
+            }).then(() => {
+              // 绘制分割线
+              ctx.beginPath();
+              ctx.moveTo(420, 40);  // 留出一些边距
+              ctx.lineTo(420, 360); // 不要占满整个高度
+              ctx.strokeStyle = '#eee';
+              ctx.stroke();
+
+              // 绘制分组信息
+              // 标题样式
+              ctx.fillStyle = '#333333';
+              ctx.font = 'bold 24px sans-serif';  // 增大字号
+              ctx.fillText('分组信息', 460, 80);
+
+              // 分组名称
+              ctx.fillStyle = '#333333';
+              ctx.font = 'bold 20px sans-serif';
+              ctx.fillText('名称：', 460, 160);
+              
+              ctx.fillStyle = '#666666';
+              ctx.font = '20px sans-serif';
+              const groupName = group ? group.name : '';
+              // 如果文本过长，进行截断
+              const maxWidth = 280; // 最大宽度
+              let displayName = groupName;
+              if (ctx.measureText(groupName).width > maxWidth) {
+                let ellipsis = '...';
+                let textWidth = ctx.measureText(ellipsis).width;
+                let i = groupName.length - 1;
+                while (i > 0) {
+                  textWidth += ctx.measureText(groupName[i]).width;
+                  if (textWidth > maxWidth) {
+                    displayName = groupName.slice(0, i) + ellipsis;
+                    break;
+                  }
+                  i--;
+                }
+              }
+              ctx.fillText(displayName, 460, 200);
+              
+              // 分组ID
+              ctx.fillStyle = '#333333';
+              ctx.font = 'bold 20px sans-serif';
+              ctx.fillText('ID：', 460, 260);
+              
+              ctx.fillStyle = '#666666';
+              ctx.font = '20px sans-serif';
+              ctx.fillText(groupId, 460, 300);
+
+              resolve(canvas);
+            });
+          } else {
+            reject(new Error('Canvas not found'));
+          }
+        });
+    });
+  },
+
   generateQrCode(groupId) {
     try {
-      // 创建二维码内容
-      const qrContent = JSON.stringify({
-        type: 'component_group',
-        id: groupId,
-        time: new Date().getTime()
-      });
-
-      // 使用 weapp-qrcode 生成二维码
-      drawQrcode({
-        width: 200,
-        height: 200,
-        canvasId: 'qrcode',
-        typeNumber: -1, // 自动计算类型
-        correctLevel: QRErrorCorrectLevel.M, // 使用 M 级别的纠错
-        background: '#ffffff',
-        foreground: '#000000',
-        text: qrContent,
-        callback: (res) => {
-          if (res && res.errMsg != 'ok') {
-            console.error('生成二维码失败：', res.errMsg);
-            wx.showToast({
-              title: '生成二维码失败',
-              icon: 'none'
-            });
-          }
-        }
+      this.generateCombinedImage(groupId).catch(error => {
+        console.error('生成组合图片失败：', error);
       });
     } catch (error) {
       console.error('生成二维码失败：', error);
+    }
+  },
+
+  // 保存二维码到相册
+  async saveQrCodeToAlbum() {
+    wx.showLoading({
+      title: '正在保存...',
+      mask: true
+    });
+
+    try {
+      const canvas = await this.generateCombinedImage(this.data.currentQrCodeId);
+      
+      // 将 canvas 转换为临时文件路径
+      wx.canvasToTempFilePath({
+        canvas: canvas,
+        success: (res) => {
+          // 保存图片到相册
+          wx.saveImageToPhotosAlbum({
+            filePath: res.tempFilePath,
+            success: () => {
+              wx.hideLoading();
+              wx.showToast({
+                title: '已保存到相册',
+                icon: 'success'
+              });
+            },
+            fail: (err) => {
+              wx.hideLoading();
+              if (err.errMsg.includes('auth deny')) {
+                wx.showModal({
+                  title: '提示',
+                  content: '需要您授权保存到相册',
+                  success: (res) => {
+                    if (res.confirm) {
+                      wx.openSetting();
+                    }
+                  }
+                });
+              } else {
+                wx.showToast({
+                  title: '保存失败',
+                  icon: 'error'
+                });
+              }
+            }
+          });
+        },
+        fail: () => {
+          wx.hideLoading();
+          wx.showToast({
+            title: '生成图片失败',
+            icon: 'error'
+          });
+        }
+      });
+    } catch (error) {
+      wx.hideLoading();
       wx.showToast({
-        title: '生成二维码失败',
-        icon: 'none'
+        title: '生成图片失败',
+        icon: 'error'
       });
     }
+  },
+
+  // 分享功能
+  async onShareAppMessage(res) {
+    if (res.from === 'button' && res.target.dataset.type === 'qrcode') {
+      const group = this.data.groupList.find(g => g.id === this.data.currentQrCodeId);
+      
+      try {
+        const canvas = await this.generateCombinedImage(this.data.currentQrCodeId);
+        const tempFile = await new Promise((resolve, reject) => {
+          wx.canvasToTempFilePath({
+            canvas: canvas,
+            success: res => resolve(res.tempFilePath),
+            fail: reject
+          });
+        });
+
+        return {
+          title: `${group ? group.name : '分组'}的元件管理二维码`,
+          path: `/pages/component/component?scan=true&groupId=${this.data.currentQrCodeId}`,
+          imageUrl: tempFile,
+        };
+      } catch (error) {
+        console.error('生成分享图片失败：', error);
+        return {
+          title: `${group ? group.name : '分组'}的元件管理二维码`,
+          path: `/pages/component/component?scan=true&groupId=${this.data.currentQrCodeId}`,
+        };
+      }
+    }
+    return {
+      title: '元件管理',
+      path: '/pages/component/component'
+    };
+  },
+
+  // 创建二维码内容
+  generateQrCodeContent(groupId) {
+    const qrContent = JSON.stringify({
+      type: 'component_group',
+      id: groupId,
+      time: new Date().getTime()
+    });
+
+    // 使用 weapp-qrcode 生成二维码
+    drawQrcode({
+      width: 200,
+      height: 200,
+      canvasId: 'qrcode',
+      typeNumber: -1, // 自动计算类型
+      correctLevel: QRErrorCorrectLevel.M, // 使用 M 级别的纠错
+      background: '#ffffff',
+      foreground: '#000000',
+      text: qrContent,
+      callback: (res) => {
+        if (res && res.errMsg != 'ok') {
+          console.error('生成二维码失败：', res.errMsg);
+        }
+      }
+    });
   }
 })

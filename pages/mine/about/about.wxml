@@ -1,0 +1,51 @@
+
+<view class="container">
+  <view class="header">
+    <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
+    <text class="title">元件管理助手</text>
+    <text class="version">版本 {{version}}</text>
+  </view>
+
+  <view class="content">
+    <view class="section">
+      <text class="section-title">项目简介</text>
+      <text class="section-content">元件管理助手是一款专门用于电子元件管理的小程序，帮助用户高效地组织和追踪各类电子元件。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">核心功能</text>
+      <view class="feature-list">
+        <view class="feature-item">
+          <text class="feature-title">分组管理</text>
+          <text class="feature-desc">创建和管理元件分组，支持搜索和快速访问</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-title">元件追踪</text>
+          <text class="feature-desc">记录元件数量、类型和存放位置</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-title">二维码支持</text>
+          <text class="feature-desc">通过扫描二维码快速添加和查看元件</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-title">搜索功能</text>
+          <text class="feature-desc">支持按名称和备注搜索分组和元件</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <text class="section-title">使用说明</text>
+      <view class="guide-list">
+        <text class="guide-item">1. 点击右下角"+"按钮创建新分组</text>
+        <text class="guide-item">2. 在分组中添加和管理元件</text>
+        <text class="guide-item">3. 使用搜索功能快速找到需要的分组或元件</text>
+        <text class="guide-item">4. 扫描分组二维码快速添加元件</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="footer">
+    <text class="copyright">扫码信息管理助手</text>
+  </view>
+</view>

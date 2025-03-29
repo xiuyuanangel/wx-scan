@@ -76,6 +76,11 @@ Page({
         
         // 检查并处理结果
         const processedResult = this.preprocessScanResult(res)
+        if (processedResult === null) {
+          // 说明是分组二维码，已经处理了跳转，不需要其他操作
+          return;
+        }
+        
         if (!processedResult) {
           wx.showToast({
             title: '扫码结果为空',
@@ -119,6 +124,21 @@ Page({
     if (!res || !res.result) return ''
     
     const result = res.result.trim()
+    
+    // 尝试解析JSON格式的二维码内容
+    try {
+      const jsonData = JSON.parse(result);
+      // 检查是否是分组二维码
+      if (jsonData.type === 'component_group' && jsonData.id) {
+        // 直接跳转到分组详情页
+        wx.navigateTo({
+          url: `/pages/component-detail/component-detail?id=${jsonData.id}`
+        });
+        return null; // 返回null阻止后续处理
+      }
+    } catch (e) {
+      // 解析失败，说明不是JSON格式，继续处理其他类型
+    }
     
     // 如果是WiFi配置，进行特殊处理
     if (result.startsWith('WIFI:')) {

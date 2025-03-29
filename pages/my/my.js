@@ -215,11 +215,8 @@ Page({
 
   // 显示关于我们
   showAbout() {
-    wx.showModal({
-      title: '关于我们',
-      content: `这是一个简单的二维码扫描工具，支持扫描并保存二维码内容，方便用户随时查看历史记录。\n\n开发者：Craft\n版本：${this.data.version}${this.data.isCheckingUpdate ? ' (检查更新中...)' : ''}`,
-      showCancel: false,
-      confirmText: '我知道了'
+    wx.navigateTo({
+      url: '/pages/mine/about/about'
     })
   }
 })

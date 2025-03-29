@@ -5,7 +5,7 @@
       <icon type="search" size="16" color="#999"/>
       <input 
         class="search-input" 
-        placeholder="搜索分组名称或备注" 
+        placeholder="搜索分组或元件信息（名称/型号/参数/备注）" 
         value="{{searchKeyword}}"
         bindinput="onSearchInput"
         bindfocus="onSearchFocus"
@@ -21,8 +21,8 @@
       />
     </view>
     <!-- 搜索结果计数 -->
-    <view class="search-result-count" wx:if="{{searchKeyword && groupList.length > 0}}">
-      找到 {{filteredGroupList.length}} 个相关分组
+    <view class="search-result-count" wx:if="{{searchKeyword && filteredGroupList.length > 0}}">
+      找到相关分组和元件
     </view>
   </view>
 
@@ -36,7 +36,7 @@
             <text class="item-desc">{{item.description}}</text>
           </view>
           <view class="item-meta">
-            <text class="item-count">{{item.count || 0}}个元件</text>
+            <text class="item-count"> {{item.typeCount || 0}} 种元件，{{item.totalCount || 0}} 个元件</text>
           </view>
         </view>
         <view class="item-actions">
@@ -119,7 +119,18 @@
     </view>
     <view class="qrcode-content">
       <canvas class="qrcode-canvas" id="qrcode" canvas-id="qrcode" type="2d"></canvas>
+      <text class="qrcode-id">分组ID：{{currentQrCodeId}}</text>
       <text class="qrcode-tip">扫描二维码快速添加元件到此分组</text>
+      <view class="qrcode-actions">
+        <button class="action-btn" bindtap="saveQrCodeToAlbum">
+          <image src="/images/save.png" class="action-icon"/>
+          <text>保存到相册</text>
+        </button>
+        <button class="action-btn" open-type="share" data-type="qrcode">
+          <image src="/images/share.png" class="action-icon"/>
+          <text>发送给好友</text>
+        </button>
+      </view>
     </view>
-  </view>
-</view>
+  </view> <!-- 修复未关闭的标签 -->
+</view> <!-- 修复未关闭的标签 -->

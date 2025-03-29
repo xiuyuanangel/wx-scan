@@ -1,0 +1,111 @@
+
+<view class="container">
+  <!-- 元件列表 -->
+  <scroll-view class="component-list" scroll-y>
+    <block wx:if="{{components.length > 0}}">
+      <view class="component-item" wx:for="{{components}}" wx:key="id" bindtap="editComponent" data-id="{{item.id}}">
+        <view class="item-main">
+          <view class="item-row">
+            <text class="label">类型：</text>
+            <text class="value">{{item.type}}</text>
+          </view>
+          <view class="item-row">
+            <text class="label">型号：</text>
+            <text class="value">{{item.model}}</text>
+          </view>
+          <view class="item-row">
+            <text class="label">参数：</text>
+            <text class="value">{{item.params}}</text>
+          </view>
+          <view class="item-row">
+            <text class="label">备注：</text>
+            <text class="value">{{item.notes}}</text>
+          </view>
+        </view>
+        <view class="delete-btn" catchtap="deleteComponent" data-id="{{item.id}}">
+          <icon type="clear" size="20" color="#ff4d4f"/>
+        </view>
+        <view class="quantity-control" catchtap="stopPropagation">
+          <view class="quantity-btn minus" catchtap="decreaseQuantity" data-id="{{item.id}}">-</view>
+          <text class="quantity-value">{{item.quantity}}</text>
+          <view class="quantity-btn plus" catchtap="increaseQuantity" data-id="{{item.id}}">+</view>
+        </view>
+      </view>
+    </block>
+    <view class="empty-state" wx:else>
+      <icon type="info" size="48" color="#999"/>
+      <text class="empty-text">暂无元件信息</text>
+      <text class="empty-sub-text">请使用扫码添加元件</text>
+    </view>
+  </scroll-view>
+
+  <!-- 添加按钮 -->
+  <view class="add-btn" bindtap="showAddComponent">
+    <image src="/images/add.png" class="add-icon"/>
+  </view>
+
+  <!-- 元件录入弹窗 -->
+  <view class="popup-mask" wx:if="{{showComponentForm}}" bindtap="hideComponentForm"></view>
+  <view class="component-form {{showComponentForm ? 'show' : ''}}">
+    <view class="form-header">
+      <text class="form-title">录入元件</text>
+      <view class="close-btn" bindtap="hideComponentForm">
+        <icon type="clear" size="20" color="#999"/>
+      </view>
+    </view>
+    
+    <view class="form-content">
+      <view class="form-item">
+        <text class="form-label">类型</text>
+        <input class="form-input" 
+               type="text" 
+               value="{{formData.type}}" 
+               placeholder="请输入元件类型"
+               bindinput="onInput"
+               data-field="type"/>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">型号</text>
+        <input class="form-input" 
+               type="text" 
+               value="{{formData.model}}" 
+               placeholder="请输入元件型号"
+               bindinput="onInput"
+               data-field="model"/>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">参数</text>
+        <textarea class="form-textarea" 
+                  value="{{formData.params}}" 
+                  placeholder="请输入元件参数"
+                  bindinput="onInput"
+                  data-field="params"/>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">备注</text>
+        <textarea class="form-textarea" 
+                  value="{{formData.notes}}" 
+                  placeholder="请输入备注信息"
+                  bindinput="onInput"
+                  data-field="notes"/>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">数量</text>
+        <input class="form-input" 
+               type="number" 
+               value="{{formData.quantity}}" 
+               placeholder="请输入数量"
+               bindinput="onInput"
+               data-field="quantity"/>
+      </view>
+    </view>
+
+    <view class="form-actions">
+      <button class="save-btn" bindtap="saveComponent">保存</button>
+    </view>
+  </view>
+</view>
