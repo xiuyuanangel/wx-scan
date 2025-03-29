@@ -7,7 +7,7 @@
             wx:key="id" 
             bindtap="copyHistoryItem" 
             bindlongpress="onLongPress"
-            data-index="{{index}}"
+            data-index="{{item.originalIndex}}"
             data-type="{{item.type}}"
             data-result="{{item.result}}">
         <view class="history-content">

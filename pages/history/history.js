@@ -42,12 +42,15 @@ Page({
   groupHistoryByDate(history) {
     const groups = {}
     
-    history.forEach(item => {
+    history.forEach((item, originalIndex) => {
       const date = item.time.split(' ')[0] // 获取日期部分
       if (!groups[date]) {
         groups[date] = []
       }
-      groups[date].push(item)
+      groups[date].push({
+        ...item,
+        originalIndex // 添加原始索引
+      })
     })
     
     return Object.entries(groups).map(([date, items]) => ({
@@ -176,7 +179,6 @@ Page({
     })
   },
 
-  // 清空历史记录
   // 复制历史记录内容
   copyHistoryItem(e) {
     const index = e.currentTarget.dataset.index
