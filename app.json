@@ -1,12 +1,55 @@
 {
   "pages": [
-    "pages/index/index"
+    "pages/index/index",
+    "pages/history/history",
+    "pages/my/my",
+    "pages/scanner/scanner",
+    "pages/product/product",
+    "pages/component/component"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",
     "navigationBarTitleText": "扫码Demo",
     "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#07c160",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/scanner/scanner",
+        "text": "扫码枪",
+        "iconPath": "images/scanner.png",
+        "selectedIconPath": "images/scanner-active.png"
+      },
+      {
+        "pagePath": "pages/component/component",
+        "text": "元件管理",
+        "iconPath": "images/component.png",
+        "selectedIconPath": "images/component-active.png"
+      },
+      {
+        "pagePath": "pages/index/index",
+        "text": "扫码",
+        "iconPath": "images/scan.png",
+        "selectedIconPath": "images/scan-active.png"
+      },
+      {
+        "pagePath": "pages/history/history",
+        "text": "历史",
+        "iconPath": "images/history.png",
+        "selectedIconPath": "images/history-active.png"
+      },
+      {
+        "pagePath": "pages/my/my",
+        "text": "我的",
+        "iconPath": "images/my.png",
+        "selectedIconPath": "images/my-active.png"
+      }
+    ]
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json"

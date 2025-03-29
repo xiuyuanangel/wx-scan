@@ -1,6 +1,6 @@
 {
   "usingComponents": {},
-  "navigationBarTitleText": "扫码Demo",
+  "navigationBarTitleText": "扫码历史",
   "componentFramework": "glass-easel",
   "lazyCodeLoading": "requiredComponents"
 }

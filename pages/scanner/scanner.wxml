@@ -1,0 +1,48 @@
+
+<view class="container">
+  <!-- 商品列表 -->
+  <scroll-view class="scan-list" scroll-y wx:if="{{scanList.length > 0}}">
+    <view class="list-item" wx:for="{{scanList}}" wx:key="id">
+      <view class="item-info">
+        <view class="item-name">{{item.name}}</view>
+        <view class="item-right">
+          <view class="quantity-control">
+            <view class="quantity-btn minus" catchtap="updateQuantity" data-index="{{index}}" data-type="minus">-</view>
+            <text class="quantity">{{item.quantity || 1}}</text>
+            <view class="quantity-btn plus" catchtap="updateQuantity" data-index="{{index}}" data-type="plus">+</view>
+          </view>
+          <view class="item-price">¥{{item.price}}</view>
+        </view>
+      </view>
+      <view class="item-detail">
+        <text class="item-time">{{item.time}}</text>
+        <text class="item-barcode">{{item.barcode}}</text>
+      </view>
+      <view class="delete-btn" catchtap="deleteItem" data-index="{{index}}">
+        <icon type="clear" size="16" color="#ff4d4f"/>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:else>
+    <icon type="info" size="48" color="#999"/>
+    <text class="empty-text">暂无扫码商品</text>
+  </view>
+
+  <!-- 底部操作区 -->
+  <view class="footer">
+    <view class="total-section">
+      <text class="total-label">总金额：</text>
+      <text class="total-amount">¥{{totalAmount}}</text>
+    </view>
+    <view class="action-section">
+      <button class="clear-btn" bindtap="clearList">
+        清空
+      </button>
+      <button class="scan-btn" bindtap="addScan">
+        <text>添加</text>
+      </button>
+    </view>
+  </view>
+</view>

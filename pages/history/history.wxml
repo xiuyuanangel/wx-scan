@@ -1,0 +1,60 @@
+<view class="container">
+  <view class="history-list" wx:if="{{historyList.length > 0}}">
+    <view class="history-group" wx:for="{{groupedHistoryList}}" wx:key="date" wx:for-item="group">
+      <view class="group-date">{{group.date}}</view>
+      <view class="history-item" 
+            wx:for="{{group.items}}" 
+            wx:key="id" 
+            bindtap="copyHistoryItem" 
+            bindlongpress="onLongPress"
+            data-index="{{index}}"
+            data-type="{{item.type}}"
+            data-result="{{item.result}}">
+        <view class="history-content">
+          <icon class="history-icon" 
+                type="{{item.type === 'url' ? 'link' : (item.type === 'json' ? 'info' : 'success')}}" 
+                size="20" 
+                color="{{item.type === 'url' ? '#1296db' : (item.type === 'json' ? '#f8b62d' : '#07c160')}}"/>
+          <view class="history-info">
+            <!-- WiFi信息显示 -->
+            <block wx:if="{{item.type === 'wifi'}}">
+              <view class="wifi-info">
+                <view class="wifi-row">
+                  <text class="wifi-label">名称：</text>
+                  <text class="wifi-value">{{item.result.ssid}}</text>
+                </view>
+                <view class="wifi-row">
+                  <text class="wifi-label">密码：</text>
+                  <text class="wifi-value">{{item.result.password}}</text>
+                </view>
+              </view>
+            </block>
+            <!-- 其他类型结果显示 -->
+            <block wx:else>
+              <text class="history-text {{item.type === 'url' ? 'url-text' : ''}}">{{item.result.displayText || item.result}}</text>
+            </block>
+            <text class="history-time">{{item.time.split(' ')[1]}}</text>
+          </view>
+        </view>
+        <text class="copy-hint">点击复制 | 长按更多</text>
+        <text class="type-tag" wx:if="{{item.type !== 'text'}}">{{item.type}}</text>
+      </view>
+    </view>
+    <view class="clear-btn" bindtap="clearHistory">
+      <icon type="clear" size="16" color="#ff4d4f"/>
+      <text class="clear-text">清空历史记录</text>
+    </view>
+  </view>
+
+  <view class="empty-tip" wx:else>
+    <icon type="info" size="40" color="#999"/>
+    <text class="empty-text">{{isLoading ? '加载中...' : '暂无扫码记录'}}</text>
+  </view>
+
+  <view class="loading-mask" wx:if="{{isLoading}}">
+    <view class="loading-content">
+      <icon type="waiting" size="32" color="#07c160"/>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+</view>

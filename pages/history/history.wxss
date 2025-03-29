@@ -1,0 +1,277 @@
+.container {
+  display: block !important;
+  padding: 0;
+}
+
+.history-list {
+  width: auto;
+  padding: 20rpx 30rpx;
+  margin-top: 10px;
+}
+
+.history-group {
+  margin-bottom: 30rpx;
+}
+
+.group-date {
+  font-size: 24rpx;
+  color: #999;
+  padding: 10rpx 20rpx;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 6rpx;
+  margin-bottom: 16rpx;
+}
+
+.history-item {
+  background: #fff;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  position: relative;
+  transition: all 0.2s;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.history-item:active {
+  background-color: #f5f5f5;
+  transform: scale(0.98);
+  box-shadow: 0 1rpx 5rpx rgba(0, 0, 0, 0.05);
+}
+
+.url-text {
+  color: #1296db;
+  text-decoration: underline;
+}
+
+.type-tag {
+  position: absolute;
+  top: 10rpx;
+  right: 10rpx;
+  font-size: 20rpx;
+  color: #fff;
+  background: #07c160;
+  padding: 4rpx 8rpx;
+  border-radius: 4rpx;
+  opacity: 0.8;
+}
+
+.type-tag[data-type="url"] {
+  background: #1296db;
+}
+
+.type-tag[data-type="json"] {
+  background: #f8b62d;
+}
+
+.type-tag[data-type="number"] {
+  background: #722ed1;
+}
+
+.history-time {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+
+.copy-hint {
+  position: absolute;
+  right: 20rpx;
+  bottom: 20rpx;
+  font-size: 24rpx;
+  color: #999;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+}
+
+.history-text {
+  font-size: 28rpx;
+  color: #333;
+  word-break: break-all;
+  line-height: 1.4;
+  margin-bottom: 8rpx;
+}
+
+.wifi-info {
+  background: rgba(7, 193, 96, 0.05);
+  padding: 12rpx;
+  border-radius: 8rpx;
+  margin-bottom: 8rpx;
+}
+
+.wifi-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6rpx;
+}
+
+.wifi-row:last-child {
+  margin-bottom: 0;
+}
+
+.wifi-label {
+  font-size: 24rpx;
+  color: #666;
+  width: 80rpx;
+  flex-shrink: 0;
+}
+
+.wifi-value {
+  font-size: 26rpx;
+  color: #333;
+  flex: 1;
+  word-break: break-all;
+}
+
+.type-tag[data-type="wifi"] {
+  background: #07c160;
+}
+
+.copy-hint {
+  position: absolute;
+  right: 20rpx;
+  bottom: 20rpx;
+  font-size: 24rpx;
+  color: #999;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+}
+
+.history-content {
+  position: relative;
+  z-index: 1;
+}
+
+.history-text {
+  font-size: 28rpx;
+  color: #333;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.copy-hint {
+  position: absolute;
+  right: 20rpx;
+  bottom: 20rpx;
+  font-size: 24rpx;
+  color: #999;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+}
+
+.loading-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-content {
+  background: rgba(0, 0, 0, 0.7);
+  padding: 30rpx 40rpx;
+  border-radius: 12rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loading-text {
+  color: #fff;
+  font-size: 28rpx;
+  margin-top: 20rpx;
+}
+
+.history-item {
+  background: #fff;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  position: relative;
+  transition: all 0.3s;
+}
+
+.history-item:active {
+  background-color: #f5f5f5;
+  transform: scale(0.98);
+}
+
+.empty-tip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 200rpx;
+  color: #999;
+}
+
+.empty-text {
+  margin-top: 20rpx;
+  font-size: 28rpx;
+}
+
+.history-content {
+  display: flex;
+  align-items: flex-start;
+}
+
+.history-icon {
+  margin-right: 20rpx;
+  margin-top: 4rpx;
+}
+
+.history-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-text {
+  font-size: 28rpx;
+  color: #333;
+  word-break: break-all;
+}
+
+.history-time {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 10rpx;
+}
+
+.clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx;
+  margin-top: 40rpx;
+}
+
+.clear-text {
+  color: #ff4d4f;
+  font-size: 28rpx;
+  margin-left: 10rpx;
+}
+
+.empty-tip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 200rpx;
+}
+
+.empty-text {
+  color: #999;
+  font-size: 28rpx;
+  margin-top: 20rpx;
+}

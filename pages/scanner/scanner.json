@@ -1,6 +1,7 @@
+
 {
+  "navigationBarTitleText": "扫码枪",
   "usingComponents": {},
-  "navigationBarTitleText": "扫码Demo",
   "componentFramework": "glass-easel",
   "lazyCodeLoading": "requiredComponents"
 }

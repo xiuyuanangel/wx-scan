@@ -1,0 +1,125 @@
+<view class="container">
+  <!-- 搜索框 -->
+  <view class="search-box">
+    <view class="search-bar">
+      <icon type="search" size="16" color="#999"/>
+      <input 
+        class="search-input" 
+        placeholder="搜索分组名称或备注" 
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        bindfocus="onSearchFocus"
+        bindblur="onSearchBlur"
+        confirm-type="search"
+      />
+      <icon 
+        wx:if="{{searchKeyword}}" 
+        type="clear" 
+        size="16" 
+        color="#999" 
+        bindtap="clearSearch"
+      />
+    </view>
+    <!-- 搜索结果计数 -->
+    <view class="search-result-count" wx:if="{{searchKeyword && groupList.length > 0}}">
+      找到 {{filteredGroupList.length}} 个相关分组
+    </view>
+  </view>
+
+  <!-- 分组列表 -->
+  <scroll-view class="group-list" scroll-y>
+    <block wx:if="{{filteredGroupList.length > 0}}">
+      <view class="group-item" wx:for="{{filteredGroupList}}" wx:key="id">
+        <view class="item-content" bindtap="showGroupDetail" data-id="{{item.id}}">
+          <view class="item-info">
+            <text class="item-name">{{item.name}}</text>
+            <text class="item-desc">{{item.description}}</text>
+          </view>
+          <view class="item-meta">
+            <text class="item-count">{{item.count || 0}}个元件</text>
+          </view>
+        </view>
+        <view class="item-actions">
+          <view class="item-qrcode" catchtap="showQrCode" data-id="{{item.id}}">
+            <icon type="info" size="30" color="#000"/>
+          </view>
+          <view class="item-delete" catchtap="deleteGroup" data-id="{{item.id}}">
+            <icon type="clear" size="30" color="#ff4d4f"/>
+          </view>
+        </view>
+      </view>
+    </block>
+    <view class="empty-state" wx:else>
+      <icon type="info" size="48" color="#999"/>
+      <block wx:if="{{searchKeyword && groupList.length > 0}}">
+        <text class="empty-text">未找到匹配的分组</text>
+        <text class="empty-sub-text">试试其他关键词</text>
+      </block>
+      <block wx:else>
+        <text class="empty-text">暂无分组信息</text>
+        <text class="empty-sub-text">点击右下角添加分组</text>
+      </block>
+    </view>
+  </scroll-view>
+
+  <!-- 添加按钮 -->
+  <view class="add-btn" bindtap="showAddGroup">
+    <image src="/images/add.png" class="add-icon"/>
+  </view>
+
+  <!-- 分组设置弹窗 -->
+  <view class="popup-mask" wx:if="{{showGroupForm}}" bindtap="hideGroupForm"></view>
+  <view class="group-form {{showGroupForm ? 'show' : ''}}">
+    <view class="form-header">
+      <text class="form-title">{{editGroup ? '编辑分组' : '添加分组'}}</text>
+      <view class="close-btn" bindtap="hideGroupForm">
+        <icon type="clear" size="20" color="#999"/>
+      </view>
+    </view>
+    
+    <view class="form-content">
+      <view class="form-item">
+        <text class="form-label">分组ID</text>
+        <text class="form-value">{{formData.id || '自动生成'}}</text>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">分组名称</text>
+        <input class="form-input" 
+               type="text" 
+               value="{{formData.name}}" 
+               placeholder="请输入分组名称"
+               bindinput="onInput"
+               data-field="name"/>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">备注</text>
+        <textarea class="form-textarea" 
+                  value="{{formData.description}}" 
+                  placeholder="请输入备注信息"
+                  bindinput="onInput"
+                  data-field="description"/>
+      </view>
+    </view>
+
+    <view class="form-actions">
+      <button class="save-btn" bindtap="saveGroup">保存</button>
+    </view>
+  </view>
+
+  <!-- 二维码弹窗 -->
+  <view class="popup-mask" wx:if="{{showQrCodePopup}}" bindtap="hideQrCode"></view>
+  <view class="qrcode-popup {{showQrCodePopup ? 'show' : ''}}">
+    <view class="popup-header">
+      <text class="popup-title">分组二维码</text>
+      <view class="close-btn" bindtap="hideQrCode">
+        <icon type="clear" size="20" color="#999"/>
+      </view>
+    </view>
+    <view class="qrcode-content">
+      <canvas class="qrcode-canvas" id="qrcode" canvas-id="qrcode" type="2d"></canvas>
+      <text class="qrcode-tip">扫描二维码快速添加元件到此分组</text>
+    </view>
+  </view>
+</view>

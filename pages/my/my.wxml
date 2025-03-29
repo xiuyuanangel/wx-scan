@@ -1,0 +1,51 @@
+
+<view class="container">
+  <view class="user-info">
+    <block wx:if="{{!hasUserInfo}}">
+      <view class="avatar-placeholder">
+        <icon type="warn" size="50" color="#999"/>
+      </view>
+      <button class="login-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+        <icon type="success" size="14" color="#fff"/>
+        <text class="btn-text">微信登录</text>
+      </button>
+    </block>
+    <block wx:else>
+      <image class="avatar" src="{{userInfo.avatarUrl}}"></image>
+      <text class="nickname">{{userInfo.nickName}}</text>
+      <button class="logout-btn" bindtap="logout">退出登录</button>
+    </block>
+  </view>
+
+  <view class="menu-list">
+    <view class="menu-item" bindtap="goToProduct">
+      <view class="menu-left">
+        <icon type="info" size="20" color="#666"/>
+        <text class="menu-text">商品管理</text>
+      </view>
+    </view>
+    <view class="menu-item" bindtap="clearCache">
+      <view class="menu-left">
+        <icon type="clear" size="20" color="#666"/>
+        <text class="menu-text">清除缓存</text>
+      </view>
+    </view>
+    <view class="menu-item" bindtap="checkUpdate">
+      <view class="menu-left">
+        <icon type="waiting" size="20" color="#666"/>
+        <text class="menu-text">检查更新</text>
+      </view>
+    </view>
+    <view class="menu-item" bindtap="showAbout">
+      <view class="menu-left">
+        <icon type="info" size="20" color="#666"/>
+        <text class="menu-text">关于我们</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="version">
+    <text>版本 {{version}}</text>
+    <text wx:if="{{isCheckingUpdate}}" class="checking-text">检查更新中...</text>
+  </view>
+</view>

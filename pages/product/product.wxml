@@ -1,0 +1,88 @@
+
+<view class="container">
+  <!-- 商品列表 -->
+  <scroll-view class="product-list" scroll-y wx:if="{{!showForm}}">
+    <view class="list-header">
+      <text class="header-title">商品列表</text>
+      <button class="add-btn" bindtap="addProduct">添加商品</button>
+    </view>
+    
+    <block wx:if="{{productList.length > 0}}">
+      <view class="product-item" wx:for="{{productList}}" wx:key="barcode">
+        <view class="item-info">
+          <view class="item-main">
+            <text class="item-name">{{item.name}}</text>
+            <text class="item-price">¥{{item.price}}</text>
+          </view>
+          <text class="item-barcode">{{item.barcode}}</text>
+        </view>
+        <view class="item-actions">
+          <view class="action-btn edit" bindtap="editProduct" data-barcode="{{barcode}}">
+            <icon type="info" size="16" color="#07c160"/>
+          </view>
+          <view class="action-btn delete" bindtap="deleteProduct" data-barcode="{{barcode}}">
+            <icon type="clear" size="16" color="#ff4d4f"/>
+          </view>
+        </view>
+      </view>
+    </block>
+    
+    <view class="empty-state" wx:else>
+      <icon type="info" size="48" color="#999"/>
+      <text class="empty-text">暂无商品信息</text>
+    </view>
+  </scroll-view>
+
+  <!-- 添加/编辑表单弹出层 -->
+  <view class="popup-mask" wx:if="{{showForm}}" bindtap="cancelEdit"></view>
+  <view class="form-container {{showForm ? 'show' : ''}}" wx:if="{{showForm}}">
+    <view class="form-header">
+      <text class="form-title">{{editProduct ? '编辑商品' : '添加商品'}}</text>
+      <view class="close-btn" bindtap="cancelEdit">
+        <icon type="clear" size="20" color="#999"/>
+      </view>
+    </view>
+    
+    <scroll-view scroll-y class="form-content" scroll-anchoring="true" enhanced="true" show-scrollbar="false">
+      <view class="form-item">
+        <text class="form-label">条码</text>
+        <view class="form-input-wrap">
+          <input class="form-input" 
+                 type="text" 
+                 value="{{formData.barcode}}" 
+                 placeholder="请输入或扫描条码"
+                 disabled="{{!!editProduct}}"
+                 bindinput="onInput"
+                 data-field="barcode"/>
+          <view class="scan-btn" bindtap="scanBarcode" wx:if="{{!editProduct}}">
+            <icon type="search" size="16" color="#07c160"/>
+          </view>
+        </view>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">名称</text>
+        <input class="form-input" 
+               type="text" 
+               value="{{formData.name}}" 
+               placeholder="请输入商品名称"
+               bindinput="onInput"
+               data-field="name"/>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">价格</text>
+        <input class="form-input" 
+               type="digit" 
+               value="{{formData.price}}" 
+               placeholder="请输入商品价格"
+               bindinput="onInput"
+               data-field="price"/>
+      </view>
+    </scroll-view>
+
+    <view class="form-actions">
+      <button class="save-btn" bindtap="saveProduct">保存</button>
+    </view>
+  </view>
+</view>

@@ -1,12 +1,61 @@
+
 <view class="container">
-  <button class="btn" bindtap="scanCode">点击扫描二维码</button>
+  <view class="scan-btn" bindtap="scanCode">
+    <icon class="icon" type="search" size="50" color="#07c160"/>
+    <text class="btn-text">点击扫描二维码/条形码</text>
+  </view>
   
   <view class="result-container" wx:if="{{scanResult}}">
     <view class="result-title">扫描结果：</view>
-    <view class="result-text">{{scanResult}}</view>
+    <view class="result-content">
+      <!-- WiFi信息显示 -->
+      <block wx:if="{{scanResult.type === 'wifi'}}">
+        <view class="wifi-info">
+          <view class="wifi-item">
+            <text class="wifi-label">WiFi名称：</text>
+            <text class="wifi-value">{{scanResult.ssid}}</text>
+          </view>
+          <view class="wifi-item">
+            <text class="wifi-label">WiFi密码：</text>
+            <text class="wifi-value">{{scanResult.password}}</text>
+          </view>
+          <view class="wifi-item" wx:if="{{scanResult.encryption}}">
+            <text class="wifi-label">加密类型：</text>
+            <text class="wifi-value">{{scanResult.encryption}}</text>
+          </view>
+          <view class="wifi-actions">
+            <button class="copy-btn" bindtap="copyWifiPassword">复制密码</button>
+            <button class="copy-btn" bindtap="copyWifiName">复制名称</button>
+          </view>
+        </view>
+      </block>
+      
+      <!-- 条形码信息显示 -->
+      <block wx:elif="{{scanResult.type === 'barcode'}}">
+        <view class="barcode-info">
+          <view class="barcode-item">
+            <text class="barcode-label">类型：</text>
+            <text class="barcode-value">{{scanResult.codeText}}</text>
+          </view>
+          <view class="barcode-item">
+            <text class="barcode-label">内容：</text>
+            <text class="barcode-value">{{scanResult.result}}</text>
+          </view>
+          <view class="barcode-actions">
+            <button class="copy-btn" bindtap="copyResult">复制内容</button>
+          </view>
+        </view>
+      </block>
+      
+      <!-- 普通结果显示 -->
+      <block wx:else>
+        <view class="result-text" bindtap="copyResult">{{scanResult.result || scanResult}}</view>
+        <view class="copy-tip">点击结果可复制</view>
+      </block>
+    </view>
   </view>
 
   <view class="tip-text" wx:if="{{!scanResult}}">
-    点击上方按钮开始扫描二维码
+    点击上方按钮开始扫描
   </view>
 </view>
